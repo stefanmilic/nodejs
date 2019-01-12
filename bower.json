@@ -1,0 +1,21 @@
+{
+  "name": "nodejs",
+  "description": "BootCamp",
+  "main": "app.js",
+  "author": "Stefan Milic",
+  "license": "ISC",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "3.3.7",
+    "jquery": "^3.3.1"
+  }
+}

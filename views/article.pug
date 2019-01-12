@@ -1,0 +1,37 @@
+extends layout
+
+block content
+  h1= article.title
+  h5 
+    em Written by #{author}
+  div#article-body= article.body
+  hr
+  if user
+    if user.id ==article.author_id
+      a.btn.btn-default(href='/articles/edit/'+article._id) Edit 
+      a.btn.btn-danger.delete-article(href='#',data-id=article._id) Delete
+    a.btn.btn-primary#answer(href="#",data-id=article._id) Answer 
+  hr
+  div#answerdiv.form-group
+  if answers
+    ul.list-group
+      each answer in answers
+        li#answer-list.list-group-item
+          .card(style='width: 18rem;')
+            .card-body
+                h5.card-subtitle.mb-2.text-muted Posted by #{answer.author}  at #{answer.posted_at}             
+                p.card-text=answer.body
+                |
+                i.fas.fa-thumbs-up.fa-lg(data-id=answer._id)
+                span.badge.badge-danger(name='likes' id="likes-count"+answer._id) #{answer.likes_count}
+                i.fas.fa-thumbs-down.fa-lg(data-id=answer._id)
+
+
+  else
+    h4 Comment first
+         
+  
+
+  
+
+  

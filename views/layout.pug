@@ -1,0 +1,47 @@
+doctype html
+html
+  head
+    title BootCamp
+    link(rel='stylesheet' href='/bower_components/bootstrap/dist/css/bootstrap.css')
+    link(rel='stylesheet' href='/css/style.css')
+    link(rel='stylesheet', href='https://use.fontawesome.com/releases/v5.6.3/css/all.css', integrity='sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/', crossorigin='anonymous')
+  body
+    nav.navbar.navbar-inverse
+      .container
+        .navbar-header
+          button.navbar-toggle.collapsed(type='button', data-toggle='collapse', data-target='#navbar', aria-expanded='false', aria-controls='navbar')
+            span.sr-only Toggle navigation
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          a.navbar-brand(href='#') BootCamp
+        #navbar.collapse.navbar-collapse
+          ul.nav.navbar-nav
+            li.nav-item
+              a.nav-link(href='/' class=path=='/'?'active':undefined) Home
+            if user
+              li.nav-item
+                a.nav-link(href='/articles/add' class=path=='/add'?'active':undefined) Add Article
+          ul.nav.navbar-nav.navbar-right
+            if user
+              li.nav-item
+                a.nav-link(href='/users/logout') Logout
+            else
+              li.nav-item
+                a.nav-link(href='/users/register' class=path=='/register'?'active':undefined) Registration
+              li.nav-item
+                a.nav-link(href='/users/login' class=path=='/login'?'active':undefined) Login
+    .container
+      != messages('message', locals)
+      if errors
+        each error, i in errors
+          div(class="alert alert-danger") #{error.msg}
+      block content
+      br
+      hr
+      footer
+        p Copyright &copy; Stefan Milic 2019
+    script(src='/bower_components/jquery/dist/jquery.js')  
+    script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js')
+    script(src='/bower_components/bootstrap/dist/js/bootstrap.js')
+    script(src='/js/main.js')  
