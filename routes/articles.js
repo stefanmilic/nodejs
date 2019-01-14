@@ -176,7 +176,7 @@ router.post("/likes/:id", ensureAuthenticated, (req, res) => {
       if (err) {
         console.log(err);
       }
-
+      g;
       req.flash("success", "Thank for the like");
     }
   );
