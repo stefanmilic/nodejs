@@ -95,50 +95,6 @@ router.post(
         });
       });
     }
-
-    // const name = req.body.name;
-    // const email = req.body.email;
-    // const password = req.body.password;
-    // const password2 = req.body.password2;
-
-    // req.checkBody("name", "Name is required").notEmpty();
-    // req.checkBody("email", "Email is required").notEmpty();
-    // req.checkBody("email", "Email is not valid").isEmail();
-    // req.checkBody("password", "Password is required").notEmpty();
-    // req
-    //   .checkBody("password2", "Passwords do not match")
-    //   .equals(req.body.password);
-
-    // let errors = req.validationErrors();
-
-    // if (errors) {
-    //   res.render("register", {
-    //     errors: errors
-    //   });
-    //  } else {
-    //   bcrypt.genSalt(10, function(err, salt) {
-    //     bcrypt.hash(password, salt, function(err, hash) {
-    //       if (err) {
-    //         console.log(err);
-    //       }
-
-    //       //insert into postgress
-    //       client.query(
-    //         "INSERT INTO users (name,email,password) VALUES($1,$2,$3)",
-    //         [name, email, hash],
-    //         function(err) {
-    //           if (err) {
-    //             console.log(err);
-    //             return;
-    //           } else {
-    //             req.flash("success", "You are now registered");
-    //             res.redirect("/users/login");
-    //           }
-    //         }
-    //       );
-    //     });
-    //   });
-    // }
   }
 );
 
