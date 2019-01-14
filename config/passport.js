@@ -32,8 +32,12 @@ module.exports = function(passport) {
         bcrypt.compare(password, user.rows[0].password, function(err, isMatch) {
           if (err) throw err;
           if (isMatch) {
-            return done(null, user.rows[0]);
+            return done(null, user.rows[0], {
+              message: `Welcome ${user.rows[0].name}`
+            });
           } else {
+            //message je alert-error class koju sam definisao u css- u
+            //ovo poruku prikazujemo u pug na mestu  != messages('message', locals)
             return done(null, false, { message: "Wrong password" });
           }
         });

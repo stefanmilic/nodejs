@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const config = require("../config/database");
+const { check, validationResult } = require("express-validator/check");
+
 //postgres base
 const { Client } = require("pg");
 
@@ -18,35 +20,45 @@ router.get("/add", ensureAuthenticated, function(req, res) {
 });
 
 // Add Submit POST Route
-router.post("/add", function(req, res) {
-  req.checkBody("title", "Title is required").notEmpty();
-  //req.checkBody('author','Author is required').notEmpty();
-  req.checkBody("body", "Body is required").notEmpty();
+router.post(
+  "/add",
+  [
+    check("title")
+      .isLength({ min: 1 })
+      .trim()
+      .withMessage("Title is required"),
+    check("body")
+      .isLength({ min: 1 })
+      .trim()
+      .withMessage("Body is required")
+  ],
 
-  // Get Errors
-  let errors = req.validationErrors();
+  function(req, res) {
+    // Get Errors
+    let errors = validationResult(req);
 
-  if (errors) {
-    res.render("add_article", {
-      title: "Add Article",
-      errors: errors
-    });
-  } else {
-    client.query(
-      "INSERT INTO articles (title,author_id,author_name,body) VALUES($1,$2,$3,$4)",
-      [req.body.title, req.user._id, req.user.name, req.body.body],
-      function(err) {
-        if (err) {
-          console.log(err);
-          return;
-        } else {
-          req.flash("success", "Article Added");
-          res.redirect("/");
+    if (!errors.isEmpty()) {
+      res.render("add_article", {
+        title: "Add Article",
+        errors: errors.mapped()
+      });
+    } else {
+      client.query(
+        "INSERT INTO articles (title,author_id,author_name,body) VALUES($1,$2,$3,$4)",
+        [req.body.title, req.user._id, req.user.name, req.body.body],
+        function(err) {
+          if (err) {
+            console.log(err);
+            return;
+          } else {
+            req.flash("success", "Article Added");
+            res.redirect("/");
+          }
         }
-      }
-    );
+      );
+    }
   }
-});
+);
 
 // Load Edit Form
 router.get("/edit/:id", ensureAuthenticated, function(req, res) {

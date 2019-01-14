@@ -46,25 +46,25 @@ app.use(function(req, res, next) {
   next();
 });
 
-// Express Validator Middleware
-app.use(
-  expressValidator({
-    errorFormatter: function(param, msg, value) {
-      var namespace = param.split("."),
-        root = namespace.shift(),
-        formParam = root;
+// // Express Validator Middleware
+// app.use(
+//   expressValidator({
+//     errorFormatter: function(param, msg, value) {
+//       var namespace = param.split("."),
+//         root = namespace.shift(),
+//         formParam = root;
 
-      while (namespace.length) {
-        formParam += "[" + namespace.shift() + "]";
-      }
-      return {
-        param: formParam,
-        msg: msg,
-        value: value
-      };
-    }
-  })
-);
+//       while (namespace.length) {
+//         formParam += "[" + namespace.shift() + "]";
+//       }
+//       return {
+//         param: formParam,
+//         msg: msg,
+//         value: value
+//       };
+//     }
+//   })
+// );
 
 // Passport Config
 require("./config/passport")(passport);
