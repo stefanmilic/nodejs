@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
+const config = require("../config/database");
+//postgres base
+const { Client } = require("pg");
 
-// Article Model
-let Article = require("../models/article");
-// User Model
-let User = require("../models/user");
-
-//answers
-let Answers = require("../models/answers");
+const client = new Client({
+  connectionString: config.postgresUrl
+});
+client.connect();
 
 // Add Route
 router.get("/add", ensureAuthenticated, function(req, res) {
@@ -32,56 +32,54 @@ router.post("/add", function(req, res) {
       errors: errors
     });
   } else {
-    let article = new Article();
-    article.title = req.body.title;
-    article.author_id = req.user._id;
-    article.author_name = req.user.name;
-    article.body = req.body.body;
-
-    article.save(function(err) {
-      if (err) {
-        console.log(err);
-        return;
-      } else {
-        req.flash("success", "Article Added");
-        res.redirect("/");
+    client.query(
+      "INSERT INTO articles (title,author_id,author_name,body) VALUES($1,$2,$3,$4)",
+      [req.body.title, req.user._id, req.user.name, req.body.body],
+      function(err) {
+        if (err) {
+          console.log(err);
+          return;
+        } else {
+          req.flash("success", "Article Added");
+          res.redirect("/");
+        }
       }
-    });
+    );
   }
 });
 
 // Load Edit Form
 router.get("/edit/:id", ensureAuthenticated, function(req, res) {
-  Article.findById(req.params.id, function(err, article) {
-    if (article.author_id != req.user._id) {
+  client.query("SELECT * FROM articles WHERE _id=$1", [req.params.id], function(
+    err,
+    article
+  ) {
+    if (article.rows[0].author_id != req.user._id) {
       req.flash("danger", "Not Authorized");
       res.redirect("/");
     }
     res.render("edit_article", {
       title: "Edit Article",
-      article: article
+      article: article.rows[0]
     });
   });
 });
 
 // Update Submit POST Route
 router.post("/edit/:id", function(req, res) {
-  let article = {};
-  article.title = req.body.title;
-  // article.author = req.body.author;
-  article.body = req.body.body;
-
-  let query = { _id: req.params.id };
-
-  Article.update(query, article, function(err) {
-    if (err) {
-      console.log(err);
-      return;
-    } else {
-      req.flash("success", "Article Updated");
-      res.redirect("/");
+  client.query(
+    "UPDATE articles SET title=$1, body=$2 WHERE _id=$3",
+    [req.body.title, req.body.body, req.params.id],
+    function(err) {
+      if (err) {
+        console.log(err);
+        return;
+      } else {
+        req.flash("success", "Article Updated");
+        res.redirect("/");
+      }
     }
-  });
+  );
 });
 
 //GET answers
@@ -89,76 +87,98 @@ router.post("/edit/:id", function(req, res) {
 // Delete Article
 router.delete("/:id", function(req, res) {
   if (!req.user._id) {
-    res.status(500).send();
+    res.status(500).send("niste se ulogovali");
   }
 
-  let query = { _id: req.params.id };
-
-  Article.findById(req.params.id, function(err, article) {
-    if (article.author != req.user._id) {
-      res.status(500).send();
+  client.query("SELECT * FROM articles WHERE _id=$1", [req.params.id], function(
+    err,
+    article
+  ) {
+    if (article.rows[0].author_id != req.user._id) {
+      res.status(500).send("user nije kreirao dati article");
     } else {
-      Article.deleteOne(query, function(err) {
-        if (err) {
-          console.log(err);
+      client.query(
+        "DELETE FROM articles WHERE _id=$1",
+        [req.params.id],
+        function(err) {
+          if (err) {
+            console.log(err);
+          }
+          res.send("Success");
         }
-        res.send("Success");
-      });
-
-      let query2 = { articleId: req.params.id };
-
-      Answers.deleteMany(query2, function(err) {
-        if (err) {
-          console.log(err);
-        }
-      });
+      );
     }
   });
+
+  client.query(
+    "DELETE FROM answers WHERE articleId=$1",
+    [req.params.id],
+    function(err) {
+      if (err) {
+        console.log(err);
+      }
+    }
+  );
 });
 
 // Get Single Article
 router.get("/:id", function(req, res) {
-  Article.findById(req.params.id, function(err, article) {
-    User.findById(article.author_id, function(err, user) {
-      Answers.find({ articleId: req.params.id }, function(err, answers) {
-        console.log(user);
-        res.render("article", {
-          article: article,
-          author: user.name,
-          answers: answers.reverse()
-        });
-      });
-    });
-  });
-});
+  const query = {
+    text: "SELECT * FROM articles WHERE _id = $1",
+    values: [req.params.id]
+  };
 
-router.post("/answers/:id", function(req, res) {
-  // res.redirect("/articles/" + req.params.id);
-
-  let answers = new Answers({
-    body: req.body.answer,
-    articleId: req.params.id,
-    author: req.user.name
+  client.query(query, function(err, article) {
+    client.query(
+      "SELECT * FROM users WHERE _id=$1",
+      [article.rows[0].author_id],
+      function(err, user) {
+        client.query(
+          "SELECT * FROM answers WHERE articleId=$1",
+          [req.params.id],
+          function(err, answers) {
+            res.render("article", {
+              article: article.rows[0],
+              author: user.rows[0].name,
+              answers: answers.rows.reverse()
+            });
+          }
+        );
+      }
+    );
   });
-  answers.save(function(err) {
-    if (err) {
-      console.log(err);
-      return;
-    } else {
-      req.flash("success", "Answer Added");
-      res.redirect("/articles/" + req.params.id);
-    }
+
+  router.post("/answers/:id", function(req, res) {
+    client.query(
+      "INSERT INTO answers (body,articleId,author) VALUES($1,$2,$3)",
+      [req.body.answer, req.params.id, req.user.name],
+      function(err) {
+        if (err) {
+          console.log(err);
+          return;
+        } else {
+          req.flash("success", "Answer Added");
+          res.redirect("/articles/" + req.params.id);
+        }
+      }
+    );
   });
 });
 
 router.post("/likes/:id", ensureAuthenticated, (req, res) => {
   let likes = req.body.like_count;
   const id = req.params.id;
+  console.log(likes, id);
+  client.query(
+    "UPDATE answers SET likes_count=$1 WHERE _id=$2",
+    [likes, id],
+    function(err) {
+      if (err) {
+        console.log(err);
+      }
 
-  Answers.updateOne(
-    { _id: id },
-    { $set: { likes_count: likes } },
-    (err, data) => {}
+      req.flash("success", "Thank for the like");
+    }
   );
 });
 

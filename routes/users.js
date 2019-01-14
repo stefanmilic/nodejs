@@ -2,8 +2,16 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const passport = require("passport");
-// Bring in User Model
-let User = require("../models/user");
+const config = require("../config/database");
+
+//postgres base
+const { Client } = require("pg");
+
+const client = new Client({
+  connectionString: config.postgresUrl
+});
+
+client.connect();
 
 // Register Form
 router.get("/register", function(req, res) {
@@ -34,27 +42,26 @@ router.post("/register", function(req, res) {
       errors: errors
     });
   } else {
-    let newUser = new User({
-      name: name,
-      email: email,
-      password: password
-    });
-
     bcrypt.genSalt(10, function(err, salt) {
-      bcrypt.hash(newUser.password, salt, function(err, hash) {
+      bcrypt.hash(password, salt, function(err, hash) {
         if (err) {
           console.log(err);
         }
-        newUser.password = hash;
-        newUser.save(function(err) {
-          if (err) {
-            console.log(err);
-            return;
-          } else {
-            req.flash("success", "You are now registered");
-            res.redirect("/users/login");
+
+        //insert into postgress
+        client.query(
+          "INSERT INTO users (name,email,password) VALUES($1,$2,$3)",
+          [name, email, hash],
+          function(err) {
+            if (err) {
+              console.log(err);
+              return;
+            } else {
+              req.flash("success", "You are now registered");
+              res.redirect("/users/login");
+            }
           }
-        });
+        );
       });
     });
   }

@@ -7,7 +7,7 @@ block content
   div#article-body= article.body
   hr
   if user
-    if user.id ==article.author_id
+    if user._id ==article.author_id
       a.btn.btn-default(href='/articles/edit/'+article._id) Edit 
       a.btn.btn-danger.delete-article(href='#',data-id=article._id) Delete
     a.btn.btn-primary#answer(href="#",data-id=article._id) Answer 

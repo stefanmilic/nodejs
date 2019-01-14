@@ -2,6 +2,7 @@ $(document).ready(function() {
   $(".delete-article").on("click", function(e) {
     $target = $(e.target);
     const id = $target.attr("data-id");
+    console.log(id);
     if (confirm("Are you sure you want to delete this item?")) {
       $.ajax({
         type: "DELETE",

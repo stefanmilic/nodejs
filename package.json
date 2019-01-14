@@ -13,14 +13,13 @@
     "body-parser": "^1.17.2",
     "bower": "^1.8.4",
     "connect-flash": "^0.1.1",
-    "dotenv": "^6.2.0",
     "express": "^4.15.3",
     "express-messages": "^1.0.1",
     "express-session": "^1.15.3",
     "express-validator": "^3.2.0",
-    "mongoose": "^5.4.1",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
+    "pg": "^7.8.0",
     "pug": "^2.0.0-rc.1"
   }
 }
