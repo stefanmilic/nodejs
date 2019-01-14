@@ -1,15 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const config = require("../config/database");
 const { check, validationResult } = require("express-validator/check");
-
-//postgres base
-const { Client } = require("pg");
-
-const client = new Client({
-  connectionString: config.postgresUrl
-});
-client.connect();
+const client = require("../config/postgres");
 
 // Add Route
 router.get("/add", ensureAuthenticated, function(req, res) {
@@ -188,7 +180,6 @@ router.post("/likes/:id", ensureAuthenticated, (req, res) => {
       if (err) {
         console.log(err);
       }
-      g;
       req.flash("success", "Thank for the like");
     }
   );

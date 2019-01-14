@@ -4,13 +4,12 @@ const bodyParser = require("body-parser");
 const expressValidator = require("express-validator");
 const session = require("express-session");
 const passport = require("passport");
-const config = require("./config/database");
-const { Client } = require("pg");
+const client = require("./config/postgres");
 
-const client = new Client({
-  connectionString: config.postgresUrl
-});
-client.connect();
+client
+  .connect()
+  .then(() => console.log("applikacija konektovana na postgres"))
+  .catch(e => console.log(e));
 
 // Init App
 const app = express();
@@ -37,6 +36,9 @@ app.use(
     saveUninitialized: true
   })
 );
+
+//express velidator
+app.use(expressValidator());
 
 // Express Messages Middleware
 app.use(require("connect-flash")());

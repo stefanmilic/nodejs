@@ -2,17 +2,15 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const passport = require("passport");
-const config = require("../config/database");
 const { check, validationResult } = require("express-validator/check");
+const client = require("../config/postgres");
+// const { Client } = require("pg");
+// const config = require("../config/database");
+// const client = new Client({
+//   connectionString: config.postgresUrl
+// });
 
-//postgres base
-const { Client } = require("pg");
-
-const client = new Client({
-  connectionString: config.postgresUrl
-});
-
-client.connect();
+// client.connect().then(() => console.log("conektovan user"));
 
 // Register Form
 router.get("/register", function(req, res) {
@@ -56,12 +54,20 @@ router.post(
             }
           });
       }),
-    check("password")
+    check("password2")
       .isLength({ min: 3 })
       .trim()
       .withMessage("password must be at least 3 characters")
-      .equals("password2")
-      .withMessage("password do not match")
+      .custom((value, { req }) => {
+        console.log(value, req.body.password2);
+        if (value !== req.body.password) {
+          return Promise.reject(
+            "Password confirmation does not match password"
+          );
+        } else {
+          return value;
+        }
+      })
   ],
   function(req, res) {
     const name = req.body.name;
