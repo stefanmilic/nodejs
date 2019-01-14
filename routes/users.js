@@ -4,14 +4,6 @@ const bcrypt = require("bcryptjs");
 const passport = require("passport");
 const { check, validationResult } = require("express-validator/check");
 const client = require("../config/postgres");
-// const { Client } = require("pg");
-// const config = require("../config/database");
-// const client = new Client({
-//   connectionString: config.postgresUrl
-// });
-
-// client.connect().then(() => console.log("conektovan user"));
-
 // Register Form
 router.get("/register", function(req, res) {
   res.render("register", {
@@ -59,7 +51,6 @@ router.post(
       .trim()
       .withMessage("password must be at least 3 characters")
       .custom((value, { req }) => {
-        console.log(value, req.body.password2);
         if (value !== req.body.password) {
           return Promise.reject(
             "Password confirmation does not match password"
@@ -94,7 +85,7 @@ router.post(
                 return;
               } else {
                 req.flash("success", "You are now registered");
-                res.redirect("/");
+                res.redirect("/users/login");
               }
             }
           );
